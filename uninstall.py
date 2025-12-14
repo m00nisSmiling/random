@@ -12,7 +12,7 @@ else:
 unban = f"{home}/unban.py"
 moni = f"{home}/moni.py"
 service = f"/etc/systemd/system/moni.service"
-log = f"/var/log/{websvr}/moni.log"
+log = f"/var/log/moni.log"
 
 os.system(f"rm -rf {unban} {moni} {service} {log}")
 time.sleep(1)
