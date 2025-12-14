@@ -2,7 +2,6 @@ import os
 import time
 
 usrname = input("| Enter your server's username :> ")
-websvr = input("| Enter your web server's name :> ")
 
 if usrname == "root":
  home = "/root"
