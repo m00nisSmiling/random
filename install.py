@@ -40,7 +40,7 @@ chat_id = '{chatid}'
 #second = c_time.second
 hostname = subprocess.getoutput("hostname")
 list1 = []
-payloads = [".php","../","/etc",".env"]
+payloads = [".php",".git","/etc",".env"]
 
 while True:
     last_line = subprocess.getoutput(f"tail -n 1 {ACCESS_LOG}")
