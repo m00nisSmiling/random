@@ -41,7 +41,7 @@ systemctl enable moni
 
 ## *** To remove an ip address from banlist ***
 ```
-python3 unabn.py
+python3 unban.py
 ```
 
 -------------------------
