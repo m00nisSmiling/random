@@ -1,5 +1,5 @@
 # Log2block
-- Description : Firewall service to 'ban' malicious HTTP traffic & 'upgrade' web server security
+- Description : Firewall service to 'block' malicious HTTP traffic & 'upgrade' web server security
 - Webserver : Nginx & Apache
 - Privilege : root
 - Operating system : linux
