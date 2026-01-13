@@ -1,69 +1,106 @@
 #!/usr/bin/python3
-import os
 import time
+from pathlib import Path
 
-websvr = input("| Webserver name - [ nginx/apache2 ] :> ")
-botkey = input("| Telegram bot api key - [ 123432988:xyzabcdefjklmnopqrs ] :> ")
-chatid = input("| Telegram chat id :> ")
+# ---------------- USER INPUT ----------------
+websvr = input("| Webserver name [nginx/apache2]: ").strip()
+botkey = input("| Telegram bot api key: ").strip()
+chatid = input("| Telegram chat id: ").strip()
+
+if websvr not in ("nginx", "apache2"):
+    raise SystemExit("Invalid webserver")
 
 home = "/root"
 
+# ---------------- SECURE moni.py ----------------
 moni_install = f"""#!/usr/bin/python3
-#from datetime import datetime
 import time
 import subprocess
 import requests
-import os
+import ipaddress
+from pathlib import Path
 
 ACCESS_LOG = "/var/log/{websvr}/access.log"
-#IP_FILE = "/root/ip"
-#Log_file = "/var/log/moni.log"
+BANNED_LOG = "/var/log/moni.log"
 
-#fileo = open(Log_file,"a")
+BOT_TOKEN = "{botkey}"
+CHAT_ID = "{chatid}"
 
-#print("Monitoring Nginx Server.....")
+PAYLOADS = [".php", ".git", "/etc", ".env"]
+banned_ips = set()
 
-turl = f"https://api.telegram.org/bot{botkey}/sendMessage"
-chat_id = '{chatid}'
-"""+"""
+def valid_ip(ip):
+    try:
+        ipaddress.ip_address(ip)
+        return True
+    except ValueError:
+        return False
 
-#c_time = datetime.now()
-#year = c_time.year
-#month = c_time.month
-#day = c_time.day
-#hour = c_time.hour
-#minute = c_time.minute
-#second = c_time.second
-hostname = subprocess.getoutput("hostname")
-list1 = []
-payloads = [".php",".git","/etc",".env"]
+def ban_ip(ip):
+    subprocess.run(
+        ["iptables", "-A", "INPUT", "-s", ip, "-p", "tcp", "-j", "DROP"],
+        check=True
+    )
 
-while True:
-    last_line = subprocess.getoutput(f"tail -n 1 {ACCESS_LOG}")
-    for i in payloads:
-        if i in last_line:
-            ip = last_line.split(" ")[0]
-            urlr = last_line.split('"')[1]
-            time = last_line.split(' ')[3]
-            if ip == "fku":
-                pass
-            else:
-                if ip in list1:
-                    pass
-                else:
+def notify(ip, url, timestamp, hostname):
+    msg = (
+        f"BANNED -> {{ip}}\\n"
+        f"{{url}}\\n"
+        f" "
+        f"[ {{hostname}} ]\\n"
+        f"[{timestamp}}]"
+    )
+    requests.post(
+        f"https://api.telegram.org/bot{{BOT_TOKEN}}/sendMessage",
+        json={{"chat_id": CHAT_ID, "text": msg}},
+        timeout=5
+    )
 
-                    os.system(f"echo '{time}] malicious ip -> {ip}' >> /var/log/moni.log")
-                    os.system(f"iptables -A INPUT -s {ip} -p tcp -j DROP -w")
-                    #os.system(f"ufw deny from {ip} to any")
-                    list1.append(ip)
-                    msg = f"Banned_ip -> {ip}\\n{urlr}\\n---------------------\\n[ {hostname} ]\\n{time}] " #change this 
-                    data = f"chat_id={chat_id}&text={msg}"
-                    resp = requests.post(turl,params=data).text
-     
-            #with open(IP_FILE, "a") as f:
-            #    f.write(ip + "")
+def monitor():
+    hostname = subprocess.check_output(["hostname"], text=True).strip()
+    log_file = Path(ACCESS_LOG)
 
+    if not log_file.exists():
+        raise RuntimeError("Access log not found")
+
+    with log_file.open() as f:
+        f.seek(0, 2)
+
+        while True:
+            line = f.readline()
+            if not line:
+                time.sleep(1)
+                continue
+
+            if not any(p in line for p in PAYLOADS):
+                continue
+
+            parts = line.split()
+            if not parts:
+                continue
+
+            ip = parts[0]
+            if not valid_ip(ip) or ip in banned_ips:
+                continue
+
+            try:
+                url = line.split('"')[1]
+                timestamp = line.split("[", 1)[1].split("]")[0]
+            except Exception:
+                continue
+
+            ban_ip(ip)
+            with open(BANNED_LOG, "a") as lf:
+                lf.write(f"[{{timestamp}}] banned {{ip}}\\n")
+
+            notify(ip, url, timestamp, hostname)
+            banned_ips.add(ip)
+
+if __name__ == "__main__":
+    monitor()
 """
+
+# ---------------- SECURE systemd service ----------------
 service_install = f"""[Unit]
 Description=Monitoring And Banning Service
 After=network.target
@@ -74,8 +111,10 @@ Restart=always
 User=root
 
 [Install]
-WantedBy=multi-user.target"""
+WantedBy=multi-user.target
+"""
 
+# ---------------- SECURE unban.py ----------------
 unban_install = """#!/usr/bin/python3
 import sys
 import os
@@ -93,52 +132,33 @@ while True:
    os.system(f"iptables -D INPUT 11")
  else:
   os.system(f"iptables -D INPUT {inp1}")
+
 """
 
+# ---------------- INSTALLER ----------------
 def install():
- moni_path = f"{home}/moni.py"
- service_path = "/etc/systemd/system/moni.service"
- banned_log_path = "/var/log/moni.log"
- unban_path = f"{home}/unban.py"
+    moni_path = Path(home) / "moni.py"
+    unban_path = Path(home) / "unban.py"
+    service_path = Path("/etc/systemd/system/moni.service")
+    banned_log_path = Path("/var/log/moni.log")
 
- os.system(f"touch {moni_path}")
- print(f"[+] created moni file in -> {moni_path}")
- time.sleep(1)
- filew1 = open(moni_path,'w')
- filew1.write(moni_install)
- print(f"[+] installed moni in -> {moni_path}")
- time.sleep(1)
- 
- os.system(f"touch {service_path}")
- print(f"[+] created moni service file in -> {service_path}")
- time.sleep(1)
- filew2 = open(service_path,'w')
- filew2.write(service_install)
- print(f"[+] installed moni service configuration in -> {service_path}")
- time.sleep(1)
- 
- os.system(f"touch {banned_log_path}")
- print(f"[+] created banned log file in -> {banned_log_path}")
- time.sleep(1)
+    moni_path.write_text(moni_install)
+    moni_path.chmod(0o700)
+    print(f"[+] Installed moni.py -> {moni_path}")
 
- os.system(f"touch {unban_path}")
- print(f"[+] created unban file in -> {unban_path}")
- time.sleep(1)
- filew3 = open(unban_path,'w')
- filew3.write(unban_install)
- print(f"[+] installed unban script in -> {unban_path}")
- time.sleep(1)
+    unban_path.write_text(unban_install)
+    unban_path.chmod(0o700)
+    print(f"[+] Installed unban.py -> {unban_path}")
 
- #os.system("systemctl daemon-reload")
- print("\n-- Run following command to start moni service --")
+    service_path.write_text(service_install)
+    print(f"[+] Installed moni.service -> {service_path}")
 
- #time.sleep(3)
- #os.system("systemctl start moni")
- print("$ systemctl daemon-reload\n$ systemctl start moni\n$ systemctl enable moni\n$ systemctl restart moni")
+    banned_log_path.touch(exist_ok=True)
+    print(f"[+] Created log -> {banned_log_path}")
 
- #time.sleep(3)
- #os.system("systemctl enable moni")
- #print("[*] moni service enabled !")
- 
+    print("\n-- Run these commands --")
+    print("systemctl daemon-reload")
+    print("systemctl enable moni")
+    print("systemctl start moni")
+
 install()
-os.system("rm -rf ../log2block")                                  
