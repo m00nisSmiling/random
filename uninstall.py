@@ -1,15 +1,8 @@
 import os
 import time
 
-usrname = input("| Enter your server's username :> ")
-
-if usrname == "root":
- home = "/root"
-else:
- home = f"/home/{usrname}"
-
-unban = f"{home}/unban.py"
-moni = f"{home}/moni.py"
+unban = f"/root/unban.py"
+moni = f"/root/moni.py"
 service = f"/etc/systemd/system/moni.service"
 log = f"/var/log/moni.log"
 
