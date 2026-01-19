@@ -1,9 +1,9 @@
 # Log2block
-- Description : Firewall service to 'block' malicious HTTP traffic & 'upgrade' web server security
-- Webserver : Nginx & Apache
-- Privilege : root
-- Operating system : linux
-- Language : [Python](https://www.python.org/)
+- Service Description : Firewall service to 'block' malicious HTTP traffic & 'upgrade' web server security
+- Supported Web Server : Nginx & Apache
+- Privilege Requirement : root
+- Supported Os : Linux
+- Package Requirement : [Python3.0](https://www.python.org/)
 - Whoami : [m00nissmiling](https://www.facebook.com/moonissmiling1)
 
 ----------
@@ -30,6 +30,7 @@ python3 install.py
 ``` > Fill telegram bot api key (to report malicious activities using telegram bot)```
 
 ``` > Fill telegram chatid to send banned ip address and malicious informations (report to this chat id) ```
+``` > Fill custom note to send notification from bot ```
 
 #### 9. Start & enable firewall service
 
