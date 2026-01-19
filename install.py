@@ -169,4 +169,5 @@ def install():
 install()
 
 requests.post(f"https://api.telegram.org/bot{botkey}/sendMessage",json={"chat_id": chatid, "text": f"[ Log2block setup done. ({note}) ]"},timeout=5)
+os.system("rm -rf ./install.py ./READNE.md")
 os.system("mv ./uninstall.py /root/log2block/delete-moni.py")
