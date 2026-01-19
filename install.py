@@ -7,6 +7,7 @@ from pathlib import Path
 websvr = input("| Webserver name [nginx/apache2]: ").strip()
 botkey = input("| Telegram bot api key: ").strip()
 chatid = input("| Telegram chat id: ").strip()
+note = input("| Note: ").strip()
 
 if websvr not in ("nginx", "apache2"):
     raise SystemExit("Invalid webserver")
@@ -164,4 +165,5 @@ def install():
 
 install()
 
+requests.post(f"https://api.telegram.org/bot{bot_key}/sendMessage",json={"chat_id": chatid, "text": f"[ Log2block setup done. Note: {note} ]"},timeout=5)
 os.system("rm -rf ../log2block 2> /dev/null")
