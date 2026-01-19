@@ -44,11 +44,11 @@ def ban_ip(ip):
 
 def notify(ip, url, timestamp, hostname):
     msg = (
-        f"BANNED -> {ip}\\n"
-        f"{url}\\n"
+        f"BANNED -> {{ip}}\\n"
+        f"{{url}}\\n"
         f" "
-        f"[ {hostname} ]\\n"
-        f"[{timestamp}]"
+        f"[ {{hostname}} ]\\n"
+        f"[{{timestamp}}]"
     )
     requests.post(
         f"https://api.telegram.org/bot{{BOT_TOKEN}}/sendMessage",
