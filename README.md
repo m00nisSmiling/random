@@ -50,13 +50,10 @@ sudo su
 ```
 python3 install.py
 ```
-```1. Fill your web server name (apache2 or nginx ...etc)```
-
-```2. Fill telegram bot api key (to report malicious activities using telegram bot)```
-
-```3. Fill telegram chatid to send banned ip address and malicious informations (report to this chat id)```
-
-```4. Fill custom note to send notification from bot```
+- Fill your web server name (apache2 or nginx ...etc)
+- Fill telegram bot api key (to report malicious activities using telegram bot)
+- Fill telegram chatid to send banned ip address and malicious informations (report to this chat id)
+- Fill custom note to send notification from bot
 
 <br>
 
