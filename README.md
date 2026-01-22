@@ -73,6 +73,8 @@ systemctl enable moni
 ```
 ------------------------
 
+<br>
+
 - To remove an ip address from banlist :
 ```
 python3 /root/log2block/unban.py
@@ -80,10 +82,14 @@ python3 /root/log2block/unban.py
 
 -------------------------
 
+<br>
+
 - To check the total list of banned ip and malicious information :
 ```
 cat /var/log/moni.log
 ```
+
+<br>
 
 - To delete Logtoblock :
 ```
